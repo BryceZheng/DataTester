@@ -108,6 +108,25 @@ template_path: ~/Desktop/your-input-file.xlsx
 - 含 **"国家"、"国籍"**（或英文 country/nation/nationality）→ **其他 / 个人资料** / 不传输
 - 含 **"性别"**（或英文 gender/sex）→ **其他 / 个人资料** / 不传输
 
+### 事件未命中时：字段名推断 G 列（数据定义）
+当 F 列事件描述无法匹配任何已知规则时，**结合 A 列字段名和 C 列字段描述**推断 G 列（数据定义）：
+
+| 字段名/描述包含 | G 列推断值 |
+|----------------|-----------|
+| battle / pvp / match / fight / rank / 段位 / 赛季 / 对战 / 积分 | PVP、PVE日志 |
+| login / account / register / 登录 / 账号 / 注册 | 账号日志 |
+| level / stage / dungeon / 关卡 / 副本 / 战斗 | 关卡、副本日志 |
+| hero / skill / equip / unlock / 英雄 / 技能 / 装备 / 成长 / 等级 / 勋章 | 成长日志 |
+| friend / guild / team / chat / 好友 / 公会 / 组队 / 社交 | 游戏内社交行为日志 |
+| item / prop / bag / 道具 / 背包 | 道具日志 |
+| pay / purchase / order / diamond / 充值 / 付费 / 钻石 / 购买 | 付费日志 |
+| shop / mall / 商城 | 商城日志 |
+| push / notify / 推送 / 弹窗 | 推送、弹窗日志 |
+| mail / 邮件 | 游戏内邮件日志 |
+| task / mission / 任务 | 任务日志 |
+| config / patch / update / 配置 / 热更 / 开关 | 配置拉取日志 |
+| 以上均不符合 | 关卡、副本日志（最通用兜底值） |
+
 ### 游戏对战性能指标 → 游戏行为日志 / 关卡、副本日志 / 明文传输
 
 以下字段名模式在游戏对局中采集，反映玩家操作体验，属于游戏行为数据：
