@@ -27,6 +27,7 @@ import sys
 import json
 import shutil
 import copy
+import os
 import openpyxl
 from openpyxl.utils import column_index_from_string
 
@@ -92,6 +93,7 @@ def main():
 
     # Copy template to output path (preserves all styling)
     shutil.copy2(template_path, output_path)
+    os.chmod(output_path, 0o644)  # ensure output is writable even if template is read-only
 
     wb = openpyxl.load_workbook(output_path)
     ws = wb.active
@@ -107,18 +109,21 @@ def main():
     template_style_row = first_data_row if ws.max_row >= first_data_row else header_row
     col_styles = get_template_row_style(ws, template_style_row, ws.max_column)
 
-    # Clear any existing data rows (keep header)
-    for row_idx in range(first_data_row, ws.max_row + 1):
-        for col in range(1, ws.max_column + 1):
-            ws.cell(row=row_idx, column=col).value = None
-
-    # Remove existing data-area merges (keep header merges)
+    # Remove existing data-area merges BEFORE clearing (keep header merges)
     merges_to_remove = []
     for merged_range in ws.merged_cells.ranges:
         if merged_range.min_row >= first_data_row:
             merges_to_remove.append(str(merged_range))
     for r in merges_to_remove:
         ws.unmerge_cells(r)
+
+    # Clear any existing data rows (keep header); skip any residual MergedCell objects
+    from openpyxl.cell.cell import MergedCell
+    for row_idx in range(first_data_row, ws.max_row + 1):
+        for col in range(1, ws.max_column + 1):
+            cell = ws.cell(row=row_idx, column=col)
+            if not isinstance(cell, MergedCell):
+                cell.value = None
 
     # Write data rows
     for i, row_data in enumerate(rows):
